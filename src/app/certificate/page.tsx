@@ -1,0 +1,2 @@
+import { AppShell } from "@/components/app-shell"; import { PageTitle, Locked } from "@/components/page-elements";
+export default function CertificatePage() { return <AppShell><PageTitle eyebrow="Training credential" title="Certificate of completion" body="Complete the full CyberAI roadmap to earn your certificate." /><Locked title="Your certificate unlocks after all eight modules are complete." href="/dashboard" action="View roadmap" /></AppShell>; }

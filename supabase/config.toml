@@ -1,0 +1,10 @@
+project_id = "cyberai"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+
+[auth]
+enabled = true
+enable_anonymous_sign_ins = true
+enable_signup = true
