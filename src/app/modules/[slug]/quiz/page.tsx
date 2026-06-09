@@ -6,16 +6,19 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { icons } from "@/components/icons";
 import { useProgress } from "@/components/progress-provider";
-import { getModule, phishingQuestions } from "@/lib/content";
-import { calculateScore, StoredAnswer } from "@/lib/progress";
+import { getModule, getModuleQuestions } from "@/lib/content";
+import { calculateScore, getModuleProgress, StoredAnswer } from "@/lib/progress";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function QuizPage() {
   const params = useParams<{ slug: string }>();
+  const slug = params.slug;
   const router = useRouter();
-  const learningModule = getModule(params.slug);
+  const learningModule = getModule(slug);
+  const questions = getModuleQuestions(slug);
   const { progress, updateProgress, refreshRemoteProgress, remoteEnabled } = useProgress();
-  const initialIndex = Math.min(progress.activeAnswers.length, phishingQuestions.length - 1);
+  const moduleProgress = getModuleProgress(progress, slug);
+  const initialIndex = Math.min(moduleProgress.activeAnswers.length, questions.length - 1);
   const [index, setIndex] = useState(initialIndex);
   const [selected, setSelected] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<"confident" | "guessing" | null>(null);
@@ -25,11 +28,12 @@ export default function QuizPage() {
   const [remoteAttemptId, setRemoteAttemptId] = useState<string | null>(null);
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    if (supabase) supabase.rpc("start_quiz_attempt", { module_slug: "phishing-email" }).then(({ data }) => { if (data) setRemoteAttemptId(data); });
-  }, []);
+    if (supabase) supabase.rpc("start_quiz_attempt", { module_slug: slug }).then(({ data }) => { if (data) setRemoteAttemptId(data); });
+  }, [slug]);
   if (!learningModule || learningModule.status !== "available") return null;
-  const question = phishingQuestions[index];
-  const answeredCount = progress.activeAnswers.length;
+  const question = questions[index];
+  const answeredCount = moduleProgress.activeAnswers.length;
+  const passThreshold = learningModule.passThreshold;
 
   async function submit() {
     if (!selected || !confidence || submitted) return;
@@ -50,46 +54,47 @@ export default function QuizPage() {
     setCorrectOptionKey(authoritativeCorrectOption);
     setFeedbackExplanation(authoritativeExplanation);
     setSubmitted(answer);
-    updateProgress((current) => ({ ...current, activeAnswers: [...current.activeAnswers, answer] }));
+    updateProgress((current) => {
+      const currentModule = getModuleProgress(current, slug);
+      return { ...current, modules: { ...current.modules, [slug]: { ...currentModule, activeAnswers: [...currentModule.activeAnswers, answer] } } };
+    });
   }
 
   async function next() {
-    if (index < phishingQuestions.length - 1) {
+    if (index < questions.length - 1) {
       setIndex(index + 1); setSelected(null); setConfidence(null); setSubmitted(null); setCorrectOptionKey(null); setFeedbackExplanation(null); return;
     }
-    const answers = [...progress.activeAnswers];
+    const answers = [...moduleProgress.activeAnswers];
     const last = submitted;
     if (last && !answers.some((answer) => answer.questionId === last.questionId)) answers.push(last);
     const score = calculateScore(answers);
     const correctCount = answers.filter((answer) => answer.correct).length;
-    if (remoteEnabled) {
-      updateProgress((current) => ({
+    updateProgress((current) => {
+      const currentModule = getModuleProgress(current, slug);
+      return {
         ...current,
-        activeAnswers: [],
-        attempts: [...current.attempts, answers],
-        bestScore: Math.max(current.bestScore, score),
-        passed: current.passed || score >= 350,
-      }));
-      await refreshRemoteProgress();
-      router.push(`/modules/phishing-email/results/latest?score=${score}&correct=${correctCount}`);
-    } else {
-      updateProgress((current) => ({
-        ...current,
-        activeAnswers: [],
-        attempts: [...current.attempts, answers],
-        bestScore: Math.max(current.bestScore, score),
-        passed: current.passed || score >= 350,
-      }));
-      router.push(`/modules/phishing-email/results/latest?score=${score}&correct=${correctCount}`);
-    }
+        modules: {
+          ...current.modules,
+          [slug]: {
+            ...currentModule,
+            activeAnswers: [],
+            attempts: [...currentModule.attempts, answers],
+            bestScore: Math.max(currentModule.bestScore, score),
+            passed: currentModule.passed || score >= passThreshold,
+          },
+        },
+      };
+    });
+    if (remoteEnabled) await refreshRemoteProgress();
+    router.push(`/modules/${slug}/results/latest?score=${score}&correct=${correctCount}`);
   }
 
   return (
     <AppShell>
       <div className="mx-auto max-w-3xl">
-        <Link href="/modules/phishing-email" className="mb-5 inline-flex text-sm font-bold" style={{ color: "var(--primary)" }}>← Exit to lesson</Link>
-        <div className="mb-6 flex items-end justify-between gap-4"><div><span className="eyebrow">Phishing knowledge check</span><h1 className="mt-1 text-2xl font-black sm:text-3xl">Question {index + 1} of {phishingQuestions.length}</h1></div><span className="text-sm font-bold">+{question.points} points</span></div>
-        <div className="mb-7 h-2 overflow-hidden rounded-full" style={{ background: "var(--border)" }}><div className="h-full rounded-full transition-all" style={{ background: learningModule.accent, width: `${((submitted ? index + 1 : index) / phishingQuestions.length) * 100}%` }} /></div>
+        <Link href={`/modules/${slug}`} className="mb-5 inline-flex text-sm font-bold" style={{ color: "var(--primary)" }}>← Exit to lesson</Link>
+        <div className="mb-6 flex items-end justify-between gap-4"><div><span className="eyebrow">{learningModule.shortTitle} knowledge check</span><h1 className="mt-1 text-2xl font-black sm:text-3xl">Question {index + 1} of {questions.length}</h1></div><span className="text-sm font-bold">+{question.points} points</span></div>
+        <div className="mb-7 h-2 overflow-hidden rounded-full" style={{ background: "var(--border)" }}><div className="h-full rounded-full transition-all" style={{ background: learningModule.accent, width: `${((submitted ? index + 1 : index) / questions.length) * 100}%` }} /></div>
         <section className="card p-5 sm:p-7">
           <h2 className="rounded-xl p-5 text-lg font-black leading-7" style={{ background: "var(--surface-muted)" }}>{question.prompt}</h2>
           <fieldset className="mt-5 space-y-3" disabled={!!submitted}>
@@ -107,7 +112,7 @@ export default function QuizPage() {
             <Confidence label="Just guessing" value="guessing" selected={confidence} onSelect={setConfidence} icon={<icons.Sparkles size={19} />} />
           </fieldset>
           {submitted && <div className="mt-6 rounded-xl p-5" style={{ background: submitted.correct ? "#dcfce7" : "#fee2e2", color: submitted.correct ? "#14532d" : "#991b1b" }}><p className="font-black">{submitted.correct ? "Correct. Nice judgment." : "Not quite. Here is the safer response."}</p><p className="mt-2 leading-6">{feedbackExplanation}</p></div>}
-          {!submitted ? <button className="button-primary mt-6 w-full" onClick={submit} disabled={!selected || !confidence}>Submit answer</button> : <button className="button-primary mt-6 w-full" onClick={next}>{index === phishingQuestions.length - 1 ? "Finish quiz" : "Next question"}</button>}
+          {!submitted ? <button className="button-primary mt-6 w-full" onClick={submit} disabled={!selected || !confidence}>Submit answer</button> : <button className="button-primary mt-6 w-full" onClick={next}>{index === questions.length - 1 ? "Finish quiz" : "Next question"}</button>}
         </section>
         {answeredCount > 0 && <p className="mt-4 text-center text-xs" style={{ color: "var(--muted)" }}>Progress is saved in this local demo session.</p>}
       </div>
