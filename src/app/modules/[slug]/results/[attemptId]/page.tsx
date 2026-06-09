@@ -13,7 +13,8 @@ export default function ResultsPage() {
   const score = Number(searchParams.get("score") ?? progress.bestScore);
   const passed = score >= 350;
   const latest = progress.attempts.at(-1) ?? [];
-  const correct = latest.filter((answer) => answer.correct).length;
+  const correctParam = searchParams.get("correct");
+  const correct = correctParam !== null ? Number(correctParam) : latest.filter((answer) => answer.correct).length;
   return <AppShell><div className="mx-auto max-w-3xl">
     <section className="card overflow-hidden text-center">
       <div className="bg-gradient-to-br from-[#5145df] to-[#9333ea] p-8 text-white sm:p-10"><span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white/15">{passed ? <icons.Award size={32} /> : <icons.BookOpen size={32} />}</span><p className="mt-5 text-xs font-black uppercase tracking-[.2em] text-violet-200">{passed ? "Module complete" : "Keep learning"}</p><h1 className="mt-2 text-3xl font-black">{passed ? "You spotted the lure." : "You are close. Review and retry."}</h1><p className="mt-3 text-violet-100">{score} / 500 points · {correct} / 4 correct</p></div>

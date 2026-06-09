@@ -61,6 +61,7 @@ export default function QuizPage() {
     const last = submitted;
     if (last && !answers.some((answer) => answer.questionId === last.questionId)) answers.push(last);
     const score = calculateScore(answers);
+    const correctCount = answers.filter((answer) => answer.correct).length;
     if (remoteEnabled) {
       updateProgress((current) => ({
         ...current,
@@ -70,7 +71,7 @@ export default function QuizPage() {
         passed: current.passed || score >= 350,
       }));
       await refreshRemoteProgress();
-      router.push(`/modules/phishing-email/results/latest?score=${score}`);
+      router.push(`/modules/phishing-email/results/latest?score=${score}&correct=${correctCount}`);
     } else {
       updateProgress((current) => ({
         ...current,
@@ -79,7 +80,7 @@ export default function QuizPage() {
         bestScore: Math.max(current.bestScore, score),
         passed: current.passed || score >= 350,
       }));
-      router.push(`/modules/phishing-email/results/latest?score=${score}`);
+      router.push(`/modules/phishing-email/results/latest?score=${score}&correct=${correctCount}`);
     }
   }
 
