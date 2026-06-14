@@ -4,7 +4,7 @@
 
 - [x] Source repository:
   [github.com/PreetiPatra16/CyberAI](https://github.com/PreetiPatra16/CyberAI)
-- [ ] Deployment URL added to README after hosting.
+- [x] Deployment URL added to README after hosting.
 - [x] Tech stack documented.
 - [x] Setup instructions documented.
 - [x] Supabase reproduction instructions documented.

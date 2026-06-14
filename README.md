@@ -2,6 +2,8 @@
 
 CyberAI is a polished, responsive cybersecurity learning platform that turns security-awareness training into measurable practice. Learners complete lessons, answer scenario-based quizzes, record their confidence, unlock rewards, and receive persisted AI coaching after each completed attempt.
 
+**Deployment Link:** [CyberAI](https://cyber-ai-ochre.vercel.app)
+
 **Repository:** [github.com/PreetiPatra16/CyberAI](https://github.com/PreetiPatra16/CyberAI)
 
 ## Product Highlights
