@@ -60,7 +60,7 @@ npm run dev -- --hostname 127.0.0.1
 2. Confirm a new anonymous user and profile appear in the dashboard.
 3. Complete the phishing quiz.
 4. Confirm rows appear in `quiz_attempts`, `quiz_responses`,
-   `module_progress`, and `earned_badges`.
+   `module_progress`, `earned_badges`, and `quiz_coaching`.
 5. Refresh the browser and confirm the dashboard still shows the best score and
    unlocked rewards.
 6. Refresh partway through a quiz and confirm it resumes at the next unanswered

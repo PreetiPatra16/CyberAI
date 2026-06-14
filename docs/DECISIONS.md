@@ -15,6 +15,7 @@
 - Next.js App Router, strict TypeScript, Tailwind CSS, and Supabase.
 - Learning content is seeded through SQL migrations; no admin UI in prototype.
 - Scoring is performed by security-definer database functions.
-- Groq learning coach is a stretch goal after core verification.
+- The persisted post-quiz Groq coach receives only topic-level performance and
+  confidence signals, with a deterministic fallback when generation fails.
 - The supplied Word brief remains local and is excluded from Git.
 - No commits are created until the user verifies a checkpoint.
