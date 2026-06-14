@@ -53,6 +53,8 @@ scoring functions, eight-module catalog, and phishing content.
 - A score of 350/500 passes the phishing module and unlocks its rewards.
 - Post-quiz coaching uses topic-level performance signals only and persists one
   validated coaching response per completed attempt.
+- Coach History lets learners revisit every saved coaching session and its
+  authoritative quiz result.
 
 See [docs/SPEC.md](docs/SPEC.md), [docs/DECISIONS.md](docs/DECISIONS.md), and
 [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) for implementation intent,

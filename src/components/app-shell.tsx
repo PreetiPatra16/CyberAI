@@ -10,6 +10,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: icons.LayoutDashboard },
   { href: "/profile", label: "Profile", icon: icons.UserRound },
+  { href: "/coach-history", label: "Coach History", icon: icons.History },
   { href: "/badges", label: "Badges", icon: icons.Award },
   { href: "/certificate", label: "Certificate", icon: icons.FileBadge2 },
   { href: "/cheat-sheet", label: "Cheat Sheet", icon: icons.FileText },
