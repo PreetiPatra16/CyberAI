@@ -1,62 +1,116 @@
-# CyberAI Phishing Prototype
+# CyberAI
 
-A polished cybersecurity-awareness learning prototype built as one complete,
-extensible vertical slice. All eight modules appear in the roadmap, while
-**Phishing: The Lure (Email)** includes a lesson, four-question quiz, confidence
-capture, immediate feedback, persisted progress, badge, and cheat sheet.
+CyberAI is a polished, responsive cybersecurity learning platform that turns security-awareness training into measurable practice. Learners complete lessons, answer scenario-based quizzes, record their confidence, unlock rewards, and receive persisted AI coaching after each completed attempt.
 
-## Stack
+**Repository:** [github.com/PreetiPatra16/CyberAI](https://github.com/PreetiPatra16/CyberAI)
 
-- Next.js App Router, React, strict TypeScript, Tailwind CSS
-- Supabase Auth and PostgreSQL with RLS and security-definer quiz RPCs
-- Groq-powered persisted post-quiz coaching using `openai/gpt-oss-120b`
-- Vitest for focused domain tests
-- Vercel-ready deployment
+## Product Highlights
 
-## Run locally
+- Eight complete cybersecurity learning modules with lessons, quizzes, and cheat sheets.
+- Email/password authentication and isolated anonymous demo accounts.
+- Server-controlled quiz scoring, resumable attempts, best-score tracking, and confidence insights.
+- Dashboard, profile, badges, cheat sheets, certificate, responsive navigation, and persisted light/dark themes.
+- Groq-powered post-quiz coaching using `openai/gpt-oss-120b`, validated structured output, deterministic fallback, and Coach History.
+- Fully reproducible Supabase schema, RLS policies, RPCs, and seed content through ordered SQL migrations.
 
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | Next.js App Router, React, strict TypeScript, Tailwind CSS |
+| Backend | Supabase Auth, PostgreSQL, Row Level Security, security-definer RPCs |
+| AI | Groq Chat Completions API, `openai/gpt-oss-120b`, JSON Schema output |
+| Testing | Vitest, TypeScript, ESLint, production build verification |
+| Deployment | Vercel-ready Next.js application with hosted Supabase |
+
+## Architecture
+
+The browser never determines quiz correctness or final scores. Authenticated Supabase RPCs validate attempts, calculate points, finalize progress, and award badges. The Groq key remains server-side; the model receives only topic-level performance and confidence signals.
+
+```mermaid
+flowchart LR
+    UI["Next.js UI"] --> AUTH["Supabase Auth"]
+    UI --> RPC["Authenticated Quiz RPCs"]
+    RPC --> DB["PostgreSQL + RLS"]
+    UI --> API["Server-only Coach API"]
+    API --> DB
+    API --> GROQ["Groq openai/gpt-oss-120b"]
 ```
 
-Supabase is required. Add the hosted project URL and anonymous key before
-starting the application. Authentication, profiles, theme preferences, quiz
-attempts, responses, scores, progress, and rewards are all database-backed.
-Set `GROQ_API_KEY` to enable AI-generated coaching. If Groq is unavailable, a
-deterministic coaching response is persisted instead.
+See [Architecture](docs/ARCHITECTURE.md) for the detailed data and request flow.
 
-Development uses `.next-dev` while production builds use `.next`, so running a
-verification build does not corrupt the active development server cache.
+## Local Setup
 
-## Reproduce Supabase
-
-1. Create an empty Supabase project.
-2. Enable anonymous sign-ins and disable email confirmation for the prototype.
-3. Link the CLI and apply every committed migration:
+Requirements: Node.js 20+, npm, a Supabase project, and optionally a Groq API key.
 
 ```bash
+git clone https://github.com/PreetiPatra16/CyberAI.git
+cd CyberAI
+npm install
+cp .env.example .env.local
+```
+
+Configure `.env.local`:
+
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLISHABLE_OR_ANON_KEY
+GROQ_API_KEY=YOUR_GROQ_API_KEY
+```
+
+Reproduce the backend in an empty Supabase project:
+
+```bash
+npx supabase login
 npx supabase link --project-ref YOUR_PROJECT_REF
 npx supabase db push
 ```
 
-Migrations create the full schema, constraints, RLS policies, server-controlled
-scoring functions, eight-module catalog, and phishing content.
+Enable email/password signups and anonymous sign-ins in Supabase Auth, then run:
 
-## Key decisions
+```bash
+npm run dev
+```
 
-- Content is authored through SQL seed migrations so future modules require no
-  quiz-engine changes.
-- Correctness determines points; confidence powers learning insights only.
-- Every attempt is retained, while the highest score drives progress.
-- A score of 350/500 passes the phishing module and unlocks its rewards.
-- Post-quiz coaching uses topic-level performance signals only and persists one
-  validated coaching response per completed attempt.
-- Coach History lets learners revisit every saved coaching session and its
-  authoritative quiz result.
+Supabase is required. `GROQ_API_KEY` is optional; if Groq is unavailable, CyberAI
+persists deterministic post-quiz coaching instead.
 
-See [docs/SPEC.md](docs/SPEC.md), [docs/DECISIONS.md](docs/DECISIONS.md), and
-[docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) for implementation intent,
-backend setup, and verification. See [AI_WORKFLOW.md](AI_WORKFLOW.md) for AI
-usage.
+Detailed setup instructions: [Supabase Setup](docs/SUPABASE_SETUP.md).
+
+## Verification
+
+```bash
+npm run verify
+```
+
+This runs linting, strict type checking, focused tests, and the production build.
+
+## Key Engineering Decisions
+
+- SQL migrations are the source of truth for schema, security, and learning
+  content.
+- Scoring and reward decisions are performed by authenticated database
+  functions, never trusted from browser state.
+- One active attempt per learner/module is enforced and created idempotently.
+- RLS isolates every learner's attempts, responses, progress, badges, and AI
+  coaching.
+- Correct answers and explanations are not shipped in frontend content.
+- AI coaching receives no profile, email, answer text, or attempt identifier.
+- AI output is schema-validated and persisted once per completed attempt.
+
+## AI-Assisted Development
+
+Codex was used throughout specification, implementation, debugging, review, and
+verification. All generated work was reviewed, tested, and committed in
+human-verified checkpoints. See [AI Workflow](AI_WORKFLOW.md) for prompts,
+workflows, and concrete examples.
+
+## Submission Guides
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Demo Guide](docs/DEMO_GUIDE.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Decision Log](docs/DECISIONS.md)
+- [Specification](docs/SPEC.md)
+- [Submission Checklist](docs/SUBMISSION_CHECKLIST.md)
+- [Supabase Setup](docs/SUPABASE_SETUP.md)
