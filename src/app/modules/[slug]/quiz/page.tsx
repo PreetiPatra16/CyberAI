@@ -111,7 +111,7 @@ export default function QuizPage() {
   }
 
   if (loading) {
-    return <AppShell><div className="card mx-auto max-w-3xl p-8 text-center"><p className="font-black">Loading your Supabase quiz attempt...</p></div></AppShell>;
+    return <AppShell><div className="card mx-auto max-w-3xl p-6 sm:p-8"><div className="flex items-center gap-3"><span className="spinner text-violet-600" /><div><p className="font-black">Preparing your quiz attempt...</p><p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>Restoring your securely saved answers</p></div></div><div className="mt-7 space-y-3"><div className="skeleton h-20 rounded-xl" /><div className="skeleton h-14 rounded-xl" /><div className="skeleton h-14 rounded-xl" /><div className="skeleton h-14 rounded-xl" /></div></div></AppShell>;
   }
 
   if (error && !attemptId) {
@@ -122,7 +122,7 @@ export default function QuizPage() {
     <AppShell>
       <div className="mx-auto max-w-3xl">
         <Link href={`/modules/${slug}`} className="mb-5 inline-flex text-sm font-bold" style={{ color: "var(--primary)" }}>← Exit to lesson</Link>
-        <div className="mb-6 flex items-end justify-between gap-4"><div><span className="eyebrow">{learningModule.shortTitle} knowledge check</span><h1 className="mt-1 text-2xl font-black sm:text-3xl">Question {index + 1} of {questions.length}</h1></div><span className="text-sm font-bold">+{question.points} points</span></div>
+        <div className="mb-6 flex items-end justify-between gap-4"><div><span className="eyebrow">{learningModule.shortTitle} knowledge check</span><h1 className="mt-1 text-2xl font-black sm:text-3xl">Question {index + 1} of {questions.length}</h1><p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>{answeredCount} answered · responses save after submission</p></div><span className="rounded-full px-3 py-1.5 text-sm font-black" style={{ background: learningModule.softAccent, color: learningModule.accent }}>+{question.points} points</span></div>
         <div className="mb-7 h-2 overflow-hidden rounded-full" style={{ background: "var(--border)" }}><div className="h-full rounded-full transition-all" style={{ background: learningModule.accent, width: `${((feedback ? index + 1 : index) / questions.length) * 100}%` }} /></div>
         <section className="card p-5 sm:p-7">
           <h2 className="rounded-xl p-5 text-lg font-black leading-7" style={{ background: "var(--surface-muted)" }}>{question.prompt}</h2>
@@ -132,7 +132,7 @@ export default function QuizPage() {
               const isSelected = selected === option.id;
               const isCorrect = feedback && option.id === feedback.correct_option_key;
               const isWrong = feedback && isSelected && !feedback.is_correct;
-              return <label key={option.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-4 transition" style={{ borderColor: isCorrect ? "#39cf78" : isWrong ? "#ef7d7d" : isSelected ? learningModule.accent : "var(--border)", background: isCorrect ? "#dcfce7" : isWrong ? "#fee2e2" : "var(--surface)" }}><span style={{ color: isCorrect ? "#116333" : isWrong ? "#991b1b" : "var(--text)" }}>{option.label}</span><input className="h-4 w-4" type="radio" name="answer" checked={isSelected} onChange={() => setSelected(option.id)} />{isCorrect && <icons.CheckCircle2 className="shrink-0 text-green-600" size={20} />}</label>;
+              return <label key={option.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-4 transition hover:-translate-y-0.5 hover:shadow-md" style={{ borderColor: isCorrect ? "#39cf78" : isWrong ? "#ef7d7d" : isSelected ? learningModule.accent : "var(--border)", background: isCorrect ? "#dcfce7" : isWrong ? "#fee2e2" : isSelected ? learningModule.softAccent : "var(--surface)" }}><span className="font-semibold" style={{ color: isCorrect ? "#116333" : isWrong ? "#991b1b" : "var(--text)" }}>{option.label}</span><input className="h-4 w-4" type="radio" name="answer" checked={isSelected} onChange={() => setSelected(option.id)} />{isCorrect && <icons.CheckCircle2 className="shrink-0 text-green-600" size={20} />}</label>;
             })}
           </fieldset>
           <fieldset className="mt-6 grid gap-3 sm:grid-cols-2" disabled={!!feedback || submitting}>
@@ -142,7 +142,7 @@ export default function QuizPage() {
           </fieldset>
           {feedback && <div className="mt-6 rounded-xl p-5" style={{ background: feedback.is_correct ? "#dcfce7" : "#fee2e2", color: feedback.is_correct ? "#14532d" : "#991b1b" }}><p className="font-black">{feedback.is_correct ? `Correct. You earned ${feedback.points_earned} points.` : "Not quite. Here is the safer response."}</p><p className="mt-2 leading-6">{feedback.explanation}</p></div>}
           {error && <p className="mt-5 rounded-xl bg-red-100 p-4 text-sm font-bold text-red-800">{error}</p>}
-          {!feedback ? <button className="button-primary mt-6 w-full" onClick={submit} disabled={!selected || !confidence || !attemptId || submitting}>{submitting ? "Submitting securely..." : "Submit answer"}</button> : <button className="button-primary mt-6 w-full" onClick={next}>{feedback.attempt_complete ? "View results" : "Next question"}</button>}
+          {!feedback ? <button className="button-primary mt-6 w-full" onClick={submit} disabled={!selected || !confidence || !attemptId || submitting}>{submitting && <span className="spinner" />}{submitting ? "Submitting securely..." : "Submit answer"}</button> : <button className="button-primary mt-6 w-full" onClick={next}>{feedback.attempt_complete ? "View results" : "Next question"} <span>→</span></button>}
         </section>
         {answeredCount > 0 && <p className="mt-4 text-center text-xs" style={{ color: "var(--muted)" }}>{answeredCount} answer{answeredCount === 1 ? "" : "s"} securely saved to Supabase.</p>}
       </div>
@@ -151,5 +151,5 @@ export default function QuizPage() {
 }
 
 function Confidence({ label, value, selected, onSelect, icon }: { label: string; value: "confident" | "guessing"; selected: "confident" | "guessing" | null; onSelect: (value: "confident" | "guessing") => void; icon: React.ReactNode }) {
-  return <label className="flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3" style={{ borderColor: selected === value ? "var(--primary)" : "var(--border)", background: selected === value ? "color-mix(in srgb, var(--primary) 10%, var(--surface))" : "var(--surface)" }}><input type="radio" name="confidence" checked={selected === value} onChange={() => onSelect(value)} />{icon}<span className="font-bold">{label}</span></label>;
+  return <label className="flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-md" style={{ borderColor: selected === value ? "var(--primary)" : "var(--border)", background: selected === value ? "color-mix(in srgb, var(--primary) 10%, var(--surface))" : "var(--surface)" }}><input type="radio" name="confidence" checked={selected === value} onChange={() => onSelect(value)} />{icon}<span className="font-bold">{label}</span></label>;
 }

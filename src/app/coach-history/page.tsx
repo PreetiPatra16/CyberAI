@@ -58,7 +58,7 @@ export default function CoachHistoryPage() {
         body="Revisit saved coaching from every completed quiz attempt."
       />
 
-      {loading && <HistoryMessage icon={<icons.Sparkles size={28} />} title="Loading your coaching history..." />}
+      {loading && <HistorySkeleton />}
       {error && <HistoryMessage icon={<icons.History size={28} />} title="Unable to load coaching history" body={error} />}
       {!loading && !error && history.length === 0 && (
         <HistoryMessage
@@ -94,7 +94,7 @@ function CoachHistoryCard({ item }: { item: CoachHistoryItem }) {
   }).format(new Date(item.generated_at));
 
   return (
-    <article className="card overflow-hidden">
+    <article className="card interactive-card overflow-hidden">
       <div className="border-l-4 p-5 sm:p-6" style={{ borderLeftColor: learningModule.accent }}>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
@@ -110,8 +110,8 @@ function CoachHistoryCard({ item }: { item: CoachHistoryItem }) {
 
         <p className="mt-5 max-w-4xl leading-7">{item.summary}</p>
 
-        <details className="mt-5 rounded-xl border" style={{ borderColor: "var(--border)" }}>
-          <summary className="cursor-pointer px-4 py-3 text-sm font-black">Review coaching details</summary>
+        <details className="mt-5 rounded-xl border transition hover:shadow-sm" style={{ borderColor: "var(--border)" }}>
+          <summary className="cursor-pointer px-4 py-3 text-sm font-black">Review coaching details <span className="ml-1" style={{ color: "var(--muted)" }}>↓</span></summary>
           <div className="grid gap-4 border-t p-4 md:grid-cols-3" style={{ borderColor: "var(--border)" }}>
             <CoachList title="Strengths" items={item.strengths} />
             <CoachList title="Focus areas" items={item.focus_areas} />
@@ -133,4 +133,8 @@ function HistoryMetric({ value, label }: { value: string; label: string }) {
 
 function HistoryMessage({ icon, title, body, action }: { icon: React.ReactNode; title: string; body?: string; action?: React.ReactNode }) {
   return <div className="card mt-7 p-8 text-center"><span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl" style={{ background: "var(--surface-muted)", color: "var(--primary)" }}>{icon}</span><h2 className="mt-5 text-xl font-black">{title}</h2>{body && <p className="mx-auto mt-2 max-w-xl" style={{ color: "var(--muted)" }}>{body}</p>}{action}</div>;
+}
+
+function HistorySkeleton() {
+  return <div className="mt-7 space-y-5"><div className="grid gap-4 sm:grid-cols-3"><div className="skeleton h-24 rounded-2xl" /><div className="skeleton h-24 rounded-2xl" /><div className="skeleton h-24 rounded-2xl" /></div><div className="skeleton h-56 rounded-2xl" /><div className="skeleton h-56 rounded-2xl" /></div>;
 }

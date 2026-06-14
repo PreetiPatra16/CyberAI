@@ -68,7 +68,7 @@ export default function ResultsPage() {
 
   if (!learningModule) return null;
   if (error) return <AppShell><div className="card mx-auto max-w-3xl p-8 text-center"><p className="font-black text-red-700">Unable to load this result</p><p className="mt-2" style={{ color: "var(--muted)" }}>{error}</p><Link className="button-secondary mt-5" href="/dashboard">Dashboard</Link></div></AppShell>;
-  if (!result) return <AppShell><div className="card mx-auto max-w-3xl p-8 text-center"><p className="font-black">Loading authoritative results from Supabase...</p></div></AppShell>;
+  if (!result) return <AppShell><div className="card mx-auto max-w-3xl overflow-hidden"><div className="skeleton h-56" /><div className="p-6 sm:p-8"><div className="grid gap-3 sm:grid-cols-3"><div className="skeleton h-20 rounded-xl" /><div className="skeleton h-20 rounded-xl" /><div className="skeleton h-20 rounded-xl" /></div><p className="mt-6 text-center text-sm font-bold" style={{ color: "var(--muted)" }}>Loading your verified results...</p></div></div></AppShell>;
   if (result.module_slug !== slug) return <AppShell><div className="card mx-auto max-w-3xl p-8 text-center"><p className="font-black text-red-700">This result does not belong to this module.</p><Link className="button-secondary mt-5" href="/dashboard">Dashboard</Link></div></AppShell>;
 
   const correct = result.responses.filter((answer) => answer.correct).length;
@@ -92,7 +92,7 @@ function CoachPanel({ coach, loading, error }: { coach: PersistedCoach | null; l
         {coach && <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">{coach.source === "groq" ? "AI generated" : "Reliable fallback"}</span>}
       </div>
       <div className="p-5 sm:p-6">
-        {loading && <p className="text-sm font-bold" style={{ color: "var(--muted)" }}>Preparing and saving your coaching...</p>}
+        {loading && <div><div className="flex items-center gap-3"><span className="spinner text-violet-600" /><p className="text-sm font-bold" style={{ color: "var(--muted)" }}>Preparing and saving your coaching...</p></div><div className="mt-5 grid gap-4 md:grid-cols-3"><div className="skeleton h-32 rounded-xl" /><div className="skeleton h-32 rounded-xl" /><div className="skeleton h-32 rounded-xl" /></div></div>}
         {error && <p className="text-sm font-bold text-red-700">{error}</p>}
         {coach && <>
           <p className="leading-7">{coach.summary}</p>

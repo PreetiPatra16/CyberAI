@@ -19,12 +19,13 @@ export default function DashboardPage() {
   const upNextProgress = getModuleProgress(progress, upNext.slug);
   return (
     <AppShell>
-      <section className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#5145df] to-[#9333ea] p-6 text-white shadow-xl sm:p-9">
-        <div className="max-w-3xl"><span className="text-xs font-black uppercase tracking-[.18em] text-violet-200">Up next</span><h1 className="mt-3 text-3xl font-black sm:text-4xl">{upNext.title}</h1><p className="mt-3 max-w-xl text-violet-100">{upNext.description}</p><Link href={`/modules/${upNext.slug}`} className="button-primary mt-6 !bg-white !text-[#4338ca]"><icons.BookOpen size={18} />{upNextProgress.passed ? "Review lesson" : "Start lesson"}</Link></div>
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#5145df] to-[#9333ea] p-6 text-white shadow-xl sm:p-9">
+        <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-white/10 blur-2xl" /><div className="absolute -bottom-24 right-24 h-48 w-48 rounded-full bg-fuchsia-300/15 blur-2xl" />
+        <div className="relative max-w-3xl"><span className="text-xs font-black uppercase tracking-[.18em] text-violet-200">Up next</span><h1 className="mt-3 text-3xl font-black sm:text-4xl">{upNext.title}</h1><p className="mt-3 max-w-xl text-violet-100">{upNext.description}</p><Link href={`/modules/${upNext.slug}`} className="button-primary mt-6 !bg-white !text-[#4338ca]"><icons.BookOpen size={18} />{upNextProgress.passed ? "Review lesson" : "Start lesson"}</Link></div>
       </section>
       <section className="card mt-7 p-5 sm:p-7">
         <div className="flex items-center justify-between gap-3"><div><span className="eyebrow">Overall progress</span><h2 className="mt-1 text-2xl font-black">Keep building safer instincts</h2></div><span className="text-sm font-bold">{completed} / 8 modules</span></div>
-        <div className="mt-5 h-3 overflow-hidden rounded-full" style={{ background: "var(--border)" }}><div className="h-full rounded-full bg-gradient-to-r from-[#5548e8] to-[#9333ea]" style={{ width: `${(completed / 8) * 100}%` }} /></div>
+        <div className="mt-5 h-3 overflow-hidden rounded-full" style={{ background: "var(--border)" }}><div className="h-full rounded-full bg-gradient-to-r from-[#5548e8] to-[#9333ea] transition-all duration-700" style={{ width: `${(completed / 8) * 100}%` }} /></div>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Metric icon={<icons.BookOpen />} value={`${completed}/8`} label="Modules completed" />
           <Metric icon={<icons.Award />} value={`${earnedPoints}`} label="Total points earned" />

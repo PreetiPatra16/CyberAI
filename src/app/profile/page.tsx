@@ -33,6 +33,7 @@ export default function ProfilePage() {
     (total, module) => total + module.attemptCount,
     0
   );
+  const hasChanges = displayName.trim() !== progress.displayName;
 
   return (
     <AppShell>
@@ -88,10 +89,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {message && <p className="mt-4 text-sm font-bold" style={{ color: message === "Profile saved." ? "var(--success)" : "#b91c1c" }}>{message}</p>}
-        <button className="button-primary mt-6" onClick={saveName} disabled={saving || !displayName.trim()}>
-          {saving ? "Saving..." : "Save profile"}
-        </button>
+        {message && <p className="mt-4 rounded-xl px-4 py-3 text-sm font-bold" style={{ color: message === "Profile saved." ? "var(--success)" : "#b91c1c", background: "var(--surface-muted)" }}>{message}</p>}
+        <div className="mt-6 flex flex-wrap items-center gap-3"><button className="button-primary" onClick={saveName} disabled={saving || !displayName.trim() || !hasChanges}>
+          {saving && <span className="spinner" />}{saving ? "Saving..." : hasChanges ? "Save profile" : "Profile up to date"}
+        </button>{hasChanges && <p className="text-sm font-bold" style={{ color: "var(--muted)" }}>You have unsaved changes.</p>}</div>
       </div>
     </AppShell>
   );
