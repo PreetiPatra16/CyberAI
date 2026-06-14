@@ -17,12 +17,20 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { progress, updateProgress } = useProgress();
+  const { progress, loading, error, refreshProgress, saveTheme } = useProgress();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", progress.theme === "dark");
   }, [progress.theme]);
+
+  if (loading) {
+    return <main className="grid min-h-screen place-items-center p-6"><div className="card max-w-md p-8 text-center"><p className="font-black">Loading your Supabase workspace...</p></div></main>;
+  }
+
+  if (error) {
+    return <main className="grid min-h-screen place-items-center p-6"><div className="card max-w-md p-8 text-center"><p className="font-black text-red-700">Unable to load your Supabase workspace</p><p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>{error}</p><button className="button-primary mt-5" onClick={() => void refreshProgress()}>Try again</button></div></main>;
+  }
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[250px_1fr]">
@@ -35,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mb-5 flex items-center justify-between"><Brand /><button className="p-2 lg:hidden" onClick={() => setOpen(false)}><icons.X size={20} /></button></div>
         <div className="mb-5 rounded-xl bg-white/10 p-3">
           <p className="text-sm font-bold text-white">{progress.displayName}</p>
-          <p className="mt-1 text-xs text-slate-400">Local demo workspace</p>
+          <p className="mt-1 text-xs text-slate-400">Supabase learning workspace</p>
         </div>
         <nav className="space-y-1">
           {navItems.map((item) => {
@@ -43,10 +51,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             return <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${active ? "bg-[#5548e8] text-white" : "hover:bg-white/10"}`}><item.icon size={19} />{item.label}</Link>;
           })}
         </nav>
-        <button className="mt-auto flex items-center gap-3 border-t border-white/15 px-3 pt-5 text-sm font-semibold" onClick={() => updateProgress((current) => ({ ...current, theme: current.theme === "dark" ? "light" : "dark" }))}>
+        <button className="mt-auto flex items-center gap-3 border-t border-white/15 px-3 pt-5 text-sm font-semibold" onClick={() => void saveTheme(progress.theme === "dark" ? "light" : "dark")}>
           {progress.theme === "dark" ? <icons.Sun size={19} /> : <icons.Moon size={19} />} {progress.theme === "dark" ? "Light mode" : "Dark mode"}
         </button>
-        <button className="mt-3 flex items-center gap-3 rounded-xl bg-red-500/90 px-3 py-3 text-sm font-semibold text-white" onClick={async () => { await createSupabaseBrowserClient()?.auth.signOut(); window.location.href = "/auth"; }}>Log out</button>
+        <button className="mt-3 flex items-center gap-3 rounded-xl bg-red-500/90 px-3 py-3 text-sm font-semibold text-white" onClick={async () => { await createSupabaseBrowserClient().auth.signOut(); window.location.href = "/auth"; }}>Log out</button>
       </aside>
       <main className="min-w-0"><div className="mx-auto max-w-7xl px-4 py-7 sm:px-7 lg:px-10 lg:py-10">{children}</div></main>
     </div>

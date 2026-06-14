@@ -18,8 +18,6 @@ export type Question = {
   prompt: string;
   points: number;
   options: { id: string; label: string }[];
-  correctOptionId: string;
-  explanation: string;
   topic: string;
 };
 
@@ -207,8 +205,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "reply", label: "Reply to the sender telling them you know it's a scam." },
         { id: "report", label: "Report it to your IT/Security department using the official reporting channel." },
       ],
-      correctOptionId: "report",
-      explanation: "Reporting phishing attempts to your IT/Security department is crucial. They can analyze the email, block the sender, and implement broader defenses to protect the organization.",
     },
     {
       id: "clicked-link",
@@ -221,8 +217,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "delete", label: "Delete the email from your inbox and trash." },
         { id: "scan", label: "Run an antivirus scan and hope for the best." },
       ],
-      correctOptionId: "disconnect",
-      explanation: "Disconnecting from the network can prevent potential malware from spreading or phoning home. Reporting immediately allows the security team to take action.",
     },
     {
       id: "biggest-red-flag",
@@ -235,8 +229,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "first-name", label: "The email is addressed to you by your first name." },
         { id: "discount", label: "The email offers you a discount on a future purchase." },
       ],
-      correctOptionId: "public-domain",
-      explanation: "Legitimate businesses, especially banks, use official corporate domains rather than free public ones. A mismatch is a strong indicator of phishing.",
     },
     {
       id: "netflix",
@@ -249,8 +241,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "official-site", label: "Open a new browser window, go to the official Netflix website, and check your account status there." },
         { id: "reply", label: "Reply to the email asking for confirmation." },
       ],
-      correctOptionId: "official-site",
-      explanation: "Never trust links in unexpected account-security emails. Go directly to the official website through a trusted method to verify any claim.",
     },
   ],
   "passwords-2fa": [
@@ -265,8 +255,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "monthly", label: "Use the same password everywhere but change it monthly" },
         { id: "pet-name", label: "Use variations of your pet's name" },
       ],
-      correctOptionId: "manager",
-      explanation: "Password managers are designed to securely create, store, and manage unique and strong passwords for every account, eliminating password reuse and the need to remember them all.",
     },
     {
       id: "strong-password",
@@ -279,8 +267,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "applepi", label: "aPpLePi3&C0ff33!" },
         { id: "qwerty", label: "QwertY@123" },
       ],
-      correctOptionId: "applepi",
-      explanation: "'aPpLePi3&C0ff33!' is a strong passphrase that is long, complex, and avoids common patterns, making it highly resistant to cracking. The others use common patterns or are too short/simple.",
     },
     {
       id: "weakest-password",
@@ -293,8 +279,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "dogname", label: "MyDogFido123" },
         { id: "troubadour", label: "Tr0ub4dor&3" },
       ],
-      correctOptionId: "summer",
-      explanation: "'Summer2024!' is predictable and follows a common pattern (word + year + symbol), making it much easier to guess with automated tools than a truly random string of characters.",
     },
     {
       id: "2fa-benefit",
@@ -307,8 +291,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "second-layer", label: "It adds a second layer of security, making your account inaccessible even if your password is stolen" },
         { id: "auto-login", label: "It automatically logs you into your accounts" },
       ],
-      correctOptionId: "second-layer",
-      explanation: "2FA's main strength is that it requires a second factor (something you have, like your phone) in addition to your password (something you know), stopping attackers who have only stolen the password.",
     },
   ],
   "malware-ransomware": [
@@ -323,8 +305,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "encrypts-files", label: "It encrypts your files and demands a payment for their release" },
         { id: "popups", label: "It displays unwanted pop-up ads" },
       ],
-      correctOptionId: "encrypts-files",
-      explanation: "Ransomware's goal is extortion. It makes your files unusable by encrypting them and then demands a ransom payment, usually in cryptocurrency, for the decryption key.",
     },
     {
       id: "software-updates",
@@ -337,8 +317,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "compatibility", label: "To ensure compatibility with new websites" },
         { id: "faster", label: "To make your software run faster" },
       ],
-      correctOptionId: "fix-vulnerabilities",
-      explanation: "Software updates frequently include 'patches' for security holes that have been discovered. Attackers specifically target these known vulnerabilities in outdated software to deliver malware.",
     },
     {
       id: "ransomware-recovery",
@@ -351,8 +329,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "backups", label: "Having recent, secure backups of your important files" },
         { id: "negotiate", label: "Negotiating with the attackers for a lower price" },
       ],
-      correctOptionId: "backups",
-      explanation: "If you have clean backups, you can restore your files without needing to pay the attackers. This neutralizes their primary leverage and is a critical part of any security strategy.",
     },
     {
       id: "malware-vectors",
@@ -365,8 +341,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "cracked-software", label: "Downloading cracked software from untrusted websites" },
         { id: "exploit-vuln", label: "Exploiting security vulnerabilities in outdated software" },
       ],
-      correctOptionId: "official-updates",
-      explanation: "Official software updates from trusted vendors are designed to fix security flaws and add features, not introduce malware. Malware typically spreads through malicious downloads, phishing, or exploiting vulnerabilities.",
     },
   ],
   "vishing-smishing": [
@@ -381,8 +355,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "official-app", label: "Delete the message and contact your bank using their official website or app" },
         { id: "call-back", label: "Call the phone number the text came from" },
       ],
-      correctOptionId: "official-app",
-      explanation: "This is a classic smishing tactic. The link leads to a fake site designed to steal your login credentials. Always verify such claims by contacting the institution through an official, trusted channel you find yourself.",
     },
     {
       id: "tech-support-call",
@@ -395,8 +367,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "hang-up", label: "Politely hang up the phone" },
         { id: "give-ip", label: "Give them your IP address so they can run a scan" },
       ],
-      correctOptionId: "hang-up",
-      explanation: "Legitimate tech support from companies like Microsoft or Apple will never call you unsolicited. This is a scam to gain control of your computer, steal data, or install malware. The only safe action is to hang up.",
     },
     {
       id: "phishing-vishing-smishing",
@@ -409,8 +379,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "medium", label: "The medium they use: email, voice call, or SMS text message" },
         { id: "danger-level", label: "The level of danger they pose" },
       ],
-      correctOptionId: "medium",
-      explanation: "They are all forms of social engineering designed to trick you. The only difference is the communication channel used: Phishing (email), Vishing (voice), and Smishing (SMS).",
     },
   ],
   "physical-travel": [
@@ -425,8 +393,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "observing-screen", label: "The act of observing someone's screen or keyboard to steal information" },
         { id: "malware-watch", label: "A type of malware that watches your screen" },
       ],
-      correctOptionId: "observing-screen",
-      explanation: "Shoulder surfing is a low-tech but effective method of stealing confidential information, like passwords or PINs, by simply looking over someone's shoulder.",
     },
     {
       id: "public-wifi",
@@ -439,8 +405,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "ask-barista", label: "Ask the barista if the Wi-Fi is secure" },
         { id: "short-connection", label: "Connect only for a few minutes at a time" },
       ],
-      correctOptionId: "vpn",
-      explanation: "While HTTPS is good, a VPN is the most comprehensive solution. It encrypts ALL your internet traffic, creating a secure tunnel that prevents anyone on the same network from snooping on your activity.",
     },
     {
       id: "lock-shortcut",
@@ -453,8 +417,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "win-l", label: "Windows Key + L" },
         { id: "ctrl-l", label: "Ctrl + L" },
       ],
-      correctOptionId: "win-l",
-      explanation: "Windows Key + L is the fastest way to lock your screen, a critical habit to build whenever you step away from your desk to prevent unauthorized physical access.",
     },
   ],
   "data-compliance": [
@@ -469,8 +431,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "pii", label: "Confidential / Personally Identifiable Information (PII)" },
         { id: "trivial", label: "Trivial" },
       ],
-      correctOptionId: "pii",
-      explanation: "PII is any data that can be used to identify a specific individual. It's considered sensitive, confidential data and must be protected to prevent identity theft and privacy violations.",
     },
     {
       id: "document-disposal",
@@ -483,8 +443,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "shredder", label: "Use a cross-cut shredder" },
         { id: "leave-desk", label: "Leave it on your desk for the cleaning crew to handle" },
       ],
-      correctOptionId: "shredder",
-      explanation: "Simply throwing away sensitive documents can lead to 'dumpster diving' attacks. A cross-cut shredder makes the documents extremely difficult to reconstruct, which is the standard for secure disposal.",
     },
     {
       id: "incident-reporting",
@@ -497,8 +455,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "tell-no-one", label: "Don't tell anyone to avoid getting in trouble" },
         { id: "report-it", label: "Immediately report the incident to your IT/Security department" },
       ],
-      correctOptionId: "report-it",
-      explanation: "Time is critical during a potential breach. Your security team has tools and procedures to investigate and contain threats, but they need to know as soon as possible. Reporting quickly is the most responsible action.",
     },
   ],
   "social-engineering": [
@@ -513,8 +469,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "guess-password", label: "To guess your password using automated tools" },
         { id: "steal-laptop", label: "To physically steal your laptop" },
       ],
-      correctOptionId: "fabricated-scenario",
-      explanation: "Pretexting involves an attacker inventing a scenario (the pretext) to engage a victim and increase the chance they will divulge information or perform actions that would be unlikely in ordinary circumstances.",
     },
     {
       id: "usb-found",
@@ -527,8 +481,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "trash", label: "Throw it in the trash" },
         { id: "give-it", label: "Give it to your IT or Security department" },
       ],
-      correctOptionId: "give-it",
-      explanation: "This is a 'baiting' attack. The USB drive could be loaded with malware that will infect any computer it's plugged into. IT/Security has safe ways to examine such devices.",
     },
     {
       id: "ceo-wire-transfer",
@@ -541,8 +493,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "verify-secondary", label: "Call the CEO or speak to them in person to verify the request" },
         { id: "forward-finance", label: "Forward the email to the finance department to handle" },
       ],
-      correctOptionId: "verify-secondary",
-      explanation: "This is a classic Business Email Compromise (BEC) scenario. Always verify unusual or urgent financial requests through a secondary, trusted communication channel (like a phone call or in-person conversation) before taking action.",
     },
   ],
   "financial-crypto": [
@@ -557,8 +507,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "pig-butchering", label: "Recognize this as a likely 'pig butchering' scam and cut off contact." },
         { id: "borrow-money", label: "Borrow money to maximize your potential returns." },
       ],
-      correctOptionId: "pig-butchering",
-      explanation: "This is a classic 'pig butchering' investment scam. Scammers build trust over time and use fake platforms showing fabricated profits to lure victims into investing large sums of money.",
     },
     {
       id: "seed-phrase",
@@ -571,8 +519,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "reply-why", label: "Reply to the email asking why they need it." },
         { id: "forward-friend", label: "Forward the email to a friend for advice." },
       ],
-      correctOptionId: "ignore-email",
-      explanation: "Your seed phrase is the master key to your crypto wallet. Legitimate exchanges or support staff will never ask for it. Anyone asking for your seed phrase is trying to steal your funds.",
     },
     {
       id: "giveaway-scam",
@@ -585,8 +531,6 @@ export const moduleQuestions: Record<string, Question[]> = {
         { id: "smart-contract-test", label: "A smart contract testing phase." },
         { id: "investment-opportunity", label: "An exclusive investment opportunity." },
       ],
-      correctOptionId: "giveaway-scam",
-      explanation: "Giveaway scams are very common on social media. Scammers often hack verified accounts or create convincing fake profiles to trick people into sending crypto, which is never returned.",
     },
   ],
 };

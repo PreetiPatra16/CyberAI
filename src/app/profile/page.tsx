@@ -1,44 +1,36 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { useProgress } from "@/components/progress-provider";
 import { PageTitle } from "@/components/page-elements";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { totalPoints } from "@/lib/progress";
 
 export default function ProfilePage() {
-  const {
-    progress,
-    updateProgress,
-    remoteEnabled,
-  } = useProgress();
+  const { progress, loading, saveDisplayName } = useProgress();
+  const [displayName, setDisplayName] = useState(progress.displayName);
+  const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  async function saveName(name: string) {
-    updateProgress((current) => ({
-      ...current,
-      displayName: name,
-    }));
+  useEffect(() => {
+    if (!loading) setDisplayName(progress.displayName);
+  }, [loading, progress.displayName]);
 
-    const supabase = createSupabaseBrowserClient();
-
-    if (supabase) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        await supabase
-          .from("profiles")
-          .update({
-            display_name: name,
-          })
-          .eq("id", user.id);
-      }
+  async function saveName() {
+    try {
+      setSaving(true);
+      setMessage("");
+      await saveDisplayName(displayName);
+      setMessage("Profile saved.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to save profile.");
+    } finally {
+      setSaving(false);
     }
   }
 
   const attemptCount = Object.values(progress.modules).reduce(
-    (total, module) => total + module.attempts.length,
+    (total, module) => total + module.attemptCount,
     0
   );
 
@@ -57,8 +49,8 @@ export default function ProfilePage() {
           <input
             className="mt-2 w-full rounded-xl border bg-transparent px-4 py-3"
             style={{ borderColor: "var(--border)" }}
-            value={progress.displayName}
-            onChange={(event) => void saveName(event.target.value)}
+            value={displayName}
+            onChange={(event) => setDisplayName(event.target.value)}
           />
         </label>
 
@@ -96,13 +88,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {!remoteEnabled && (
-          <button
-            className="button-secondary mt-6"
-          >
-            Reset local demo progress
-          </button>
-        )}
+        {message && <p className="mt-4 text-sm font-bold" style={{ color: message === "Profile saved." ? "var(--success)" : "#b91c1c" }}>{message}</p>}
+        <button className="button-primary mt-6" onClick={saveName} disabled={saving || !displayName.trim()}>
+          {saving ? "Saving..." : "Save profile"}
+        </button>
       </div>
     </AppShell>
   );

@@ -1,4 +1,4 @@
-export type StoredAnswer = {
+export type QuizAnswer = {
   questionId: string;
   optionId: string;
   confidence: "confident" | "guessing";
@@ -7,40 +7,34 @@ export type StoredAnswer = {
 };
 
 export type ModuleProgress = {
-  attempts: StoredAnswer[][];
-  activeAnswers: StoredAnswer[];
+  attemptCount: number;
   passed: boolean;
   bestScore: number;
 };
 
-export type LocalProgress = {
+export type UserProgress = {
   displayName: string;
   modules: Record<string, ModuleProgress>;
   theme: "light" | "dark";
 };
 
 export const defaultModuleProgress: ModuleProgress = {
-  attempts: [],
-  activeAnswers: [],
+  attemptCount: 0,
   passed: false,
   bestScore: 0,
 };
 
-export const defaultProgress: LocalProgress = {
-  displayName: "Demo Learner",
+export const defaultProgress: UserProgress = {
+  displayName: "Learner",
   modules: {},
   theme: "light",
 };
 
-export function getModuleProgress(progress: LocalProgress, slug: string): ModuleProgress {
+export function getModuleProgress(progress: UserProgress, slug: string): ModuleProgress {
   return progress.modules[slug] ?? defaultModuleProgress;
 }
 
-export function calculateScore(answers: StoredAnswer[]) {
-  return answers.reduce((total, answer) => total + answer.points, 0);
-}
-
-export function insightFor(answers: StoredAnswer[]) {
+export function insightFor(answers: QuizAnswer[]) {
   const confidentMisses = answers.filter((answer) => answer.confidence === "confident" && !answer.correct).length;
   const misses = answers.filter((answer) => !answer.correct).length;
   if (confidentMisses > 0) return "Review the explanations for your confident misses. These are the most valuable knowledge gaps to correct.";
@@ -65,10 +59,10 @@ export function levelFor(totalPoints: number) {
   return { level: number, statusName: current.statusName };
 }
 
-export function totalPoints(progress: LocalProgress) {
+export function totalPoints(progress: UserProgress) {
   return Object.values(progress.modules).reduce((total, module) => total + module.bestScore, 0);
 }
 
-export function completedCount(progress: LocalProgress) {
+export function completedCount(progress: UserProgress) {
   return Object.values(progress.modules).filter((module) => module.passed).length;
 }

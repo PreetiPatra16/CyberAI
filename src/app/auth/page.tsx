@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { icons } from "@/components/icons";
-import { createSupabaseBrowserClient, hasSupabaseConfig } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -13,24 +13,32 @@ export default function AuthPage() {
   const [working, setWorking] = useState(false);
 
   async function submitAuth() {
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) return;
-    setWorking(true); setMessage("");
-    const result = mode === "login"
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName } } });
-    setWorking(false);
-    if (result.error) setMessage(result.error.message);
-    else window.location.href = "/dashboard";
+    try {
+      const supabase = createSupabaseBrowserClient();
+      setWorking(true); setMessage("");
+      const result = mode === "login"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password, options: { data: { display_name: displayName } } });
+      if (result.error) setMessage(result.error.message);
+      else window.location.href = "/dashboard";
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Authentication failed.");
+    } finally {
+      setWorking(false);
+    }
   }
 
   async function launchDemo() {
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) { window.location.href = "/dashboard"; return; }
-    setWorking(true);
-    const result = await supabase.auth.signInAnonymously({ options: { data: { display_name: "Demo Learner" } } });
-    if (result.error) { setWorking(false); setMessage(result.error.message); }
-    else window.location.href = "/dashboard";
+    try {
+      setWorking(true); setMessage("");
+      const result = await createSupabaseBrowserClient().auth.signInAnonymously({ options: { data: { display_name: "Demo Learner" } } });
+      if (result.error) setMessage(result.error.message);
+      else window.location.href = "/dashboard";
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Demo sign-in failed.");
+    } finally {
+      setWorking(false);
+    }
   }
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.1fr_.9fr]">
@@ -49,16 +57,16 @@ export default function AuthPage() {
           <div className="mb-8 flex items-center gap-3 text-2xl font-black lg:hidden"><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#5548e8] text-white"><icons.Shield /></span><span><b className="text-[#ff5664]">Cyber</b><b className="text-[#4f7eff]">AI</b></span></div>
           <span className="eyebrow">Welcome to CyberAI</span>
           <h2 className="mt-2 text-3xl font-black">{mode === "login" ? "Continue your training" : "Create your learner account"}</h2>
-          <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>Hosted authentication activates when Supabase environment keys are added.</p>
+          <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>Your account and learning progress are securely stored in Supabase.</p>
           <form className="mt-7 space-y-4" onSubmit={(event) => event.preventDefault()}>
             {mode === "signup" && <Field label="Display name" type="text" placeholder="Your name" value={displayName} onChange={setDisplayName} />}
             <Field label="Email" type="email" placeholder="you@company.com" value={email} onChange={setEmail} />
             <Field label="Password" type="password" placeholder="At least 8 characters" value={password} onChange={setPassword} />
-            <button className="button-primary w-full" type="button" onClick={submitAuth} disabled={!hasSupabaseConfig || !email || !password || working}>{working ? "Working..." : mode === "login" ? "Sign in with Supabase" : "Create account"}</button>
+            <button className="button-primary w-full" type="button" onClick={submitAuth} disabled={!email || !password || working}>{working ? "Working..." : mode === "login" ? "Sign in with Supabase" : "Create account"}</button>
           </form>
           {message && <p className="mt-4 rounded-xl bg-red-100 p-3 text-sm font-bold text-red-800">{message}</p>}
           <div className="my-6 flex items-center gap-3 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--muted)" }}><span className="h-px flex-1" style={{ background: "var(--border)" }} />or explore now<span className="h-px flex-1" style={{ background: "var(--border)" }} /></div>
-          <button className="button-secondary w-full" onClick={launchDemo} disabled={working}><icons.Sparkles size={18} />{hasSupabaseConfig ? "Launch isolated Supabase demo" : "Launch isolated local demo"}</button>
+          <button className="button-secondary w-full" onClick={launchDemo} disabled={working}><icons.Sparkles size={18} />Launch isolated Supabase demo</button>
           <button className="mt-6 w-full text-sm font-bold" onClick={() => setMode(mode === "login" ? "signup" : "login")} style={{ color: "var(--primary)" }}>{mode === "login" ? "Need an account? Sign up" : "Already have an account? Sign in"}</button>
         </div>
       </section>
