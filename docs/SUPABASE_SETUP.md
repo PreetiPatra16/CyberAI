@@ -63,5 +63,7 @@ npm run dev -- --hostname 127.0.0.1
    `module_progress`, and `earned_badges`.
 5. Refresh the browser and confirm the dashboard still shows the best score and
    unlocked rewards.
-6. Log out, launch another demo, and confirm the new user begins with no
+6. Refresh partway through a quiz and confirm it resumes at the next unanswered
+   question.
+7. Log out, launch another demo, and confirm the new user begins with no
    progress.

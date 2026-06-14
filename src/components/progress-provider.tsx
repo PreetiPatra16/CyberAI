@@ -1,103 +1,95 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { defaultModuleProgress, defaultProgress, LocalProgress, ModuleProgress, StoredAnswer } from "@/lib/progress";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { defaultProgress, ModuleProgress, UserProgress } from "@/lib/progress";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type ProgressContextValue = {
-  progress: LocalProgress;
-  updateProgress: (next: LocalProgress | ((current: LocalProgress) => LocalProgress)) => void;
-  resetDemo: () => void;
-  refreshRemoteProgress: () => Promise<void>;
-  remoteEnabled: boolean;
-  hydrated: boolean;
+  progress: UserProgress;
+  loading: boolean;
+  error: string | null;
+  refreshProgress: () => Promise<void>;
+  saveDisplayName: (displayName: string) => Promise<void>;
+  saveTheme: (theme: UserProgress["theme"]) => Promise<void>;
 };
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
-const STORAGE_KEY = "cyberai-local-progress";
-
-type LegacyProgress = {
-  attempts?: StoredAnswer[][];
-  activeAnswers?: StoredAnswer[];
-  passed?: boolean;
-  bestScore?: number;
-};
-
-function migrateStoredProgress(stored: LocalProgress & LegacyProgress): LocalProgress {
-  const migrated: LocalProgress = { ...defaultProgress, ...stored, modules: { ...stored.modules } };
-  if (stored.attempts || stored.activeAnswers || stored.passed || stored.bestScore) {
-    const legacy: ModuleProgress = {
-      attempts: stored.attempts ?? [],
-      activeAnswers: stored.activeAnswers ?? [],
-      passed: stored.passed ?? false,
-      bestScore: stored.bestScore ?? 0,
-    };
-    migrated.modules = { "phishing-email": legacy, ...migrated.modules };
-  }
-  return migrated;
-}
 
 export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState(defaultProgress);
-  const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  async function refreshRemoteProgress() {
+  const refreshProgress = useCallback(async () => {
+    setError(null);
     const supabase = createSupabaseBrowserClient();
-    if (!supabase) return;
-    const [{ data: profile }, { data: remoteProgress }, { data: attempts }] = await Promise.all([
-      supabase.from("profiles").select("display_name").maybeSingle(),
-      supabase.from("module_progress").select("best_score,passed,modules!inner(slug)"),
-      supabase.from("quiz_attempts").select("status,modules!inner(slug)").eq("status", "completed"),
+    const [{ data: profile, error: profileError }, { data: remoteProgress, error: progressError }] = await Promise.all([
+      supabase.from("profiles").select("display_name,theme").single(),
+      supabase.from("module_progress").select("attempt_count,best_score,passed,modules!inner(slug)"),
     ]);
-    setProgress((current) => {
-      const modules: Record<string, ModuleProgress> = { ...current.modules };
-      for (const row of remoteProgress ?? []) {
-        const slug = (row.modules as unknown as { slug: string })?.slug;
-        if (!slug) continue;
-        const existing = modules[slug] ?? defaultModuleProgress;
-        modules[slug] = { ...existing, bestScore: row.best_score ?? 0, passed: row.passed ?? false };
-      }
-      const attemptCounts: Record<string, number> = {};
-      for (const row of attempts ?? []) {
-        const slug = (row.modules as unknown as { slug: string })?.slug;
-        if (!slug) continue;
-        attemptCounts[slug] = (attemptCounts[slug] ?? 0) + 1;
-      }
-      for (const [slug, count] of Object.entries(attemptCounts)) {
-        const existing = modules[slug] ?? defaultModuleProgress;
-        modules[slug] = { ...existing, attempts: Array.from({ length: count }, (_, index) => existing.attempts[index] ?? []) };
-      }
-      return {
-        ...current,
-        displayName: profile?.display_name ?? current.displayName,
-        modules,
-      };
-    });
-  }
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) setProgress(migrateStoredProgress(JSON.parse(stored)));
-    setHydrated(true);
-    void refreshRemoteProgress();
+    const requestError = profileError ?? progressError;
+    if (requestError) {
+      setError(requestError.message);
+      setLoading(false);
+      return;
+    }
+
+    const modules: Record<string, ModuleProgress> = {};
+    for (const row of remoteProgress ?? []) {
+      const slug = (row.modules as unknown as { slug: string })?.slug;
+      if (!slug) continue;
+      modules[slug] = {
+        attemptCount: row.attempt_count ?? 0,
+        bestScore: row.best_score ?? 0,
+        passed: row.passed ?? false,
+      };
+    }
+
+    setProgress({
+      displayName: profile.display_name,
+      theme: profile.theme === "dark" ? "dark" : "light",
+      modules,
+    });
+    setLoading(false);
   }, []);
 
-  const updateProgress = (next: LocalProgress | ((current: LocalProgress) => LocalProgress)) => {
-    setProgress((current) => {
-      const value = typeof next === "function" ? next(current) : next;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-      return value;
-    });
-  };
+  useEffect(() => {
+    void refreshProgress();
+  }, [refreshProgress]);
+
+  async function saveDisplayName(displayName: string) {
+    const value = displayName.trim();
+    if (!value) throw new Error("Display name is required.");
+    const { data: { user }, error: userError } = await createSupabaseBrowserClient().auth.getUser();
+    if (userError || !user) throw userError ?? new Error("Authentication required.");
+    const { error: updateError } = await createSupabaseBrowserClient()
+      .from("profiles")
+      .update({ display_name: value })
+      .eq("id", user.id);
+    if (updateError) throw updateError;
+    setProgress((current) => ({ ...current, displayName: value }));
+  }
+
+  async function saveTheme(theme: UserProgress["theme"]) {
+    const { data: { user }, error: userError } = await createSupabaseBrowserClient().auth.getUser();
+    if (userError || !user) throw userError ?? new Error("Authentication required.");
+    const { error: updateError } = await createSupabaseBrowserClient()
+      .from("profiles")
+      .update({ theme })
+      .eq("id", user.id);
+    if (updateError) throw updateError;
+    setProgress((current) => ({ ...current, theme }));
+  }
 
   const value = useMemo(() => ({
     progress,
-    updateProgress,
-    resetDemo: () => updateProgress(defaultProgress),
-    refreshRemoteProgress,
-    remoteEnabled: Boolean(createSupabaseBrowserClient()),
-    hydrated,
-  }), [progress, hydrated]);
+    loading,
+    error,
+    refreshProgress,
+    saveDisplayName,
+    saveTheme,
+  }), [progress, loading, error, refreshProgress]);
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }

@@ -26,6 +26,8 @@ create policy "users read own badges" on public.earned_badges for select using (
 
 revoke all on public.question_options from anon, authenticated;
 grant select(id, question_id, sort_order, label) on public.question_options to authenticated;
-grant select on public.modules, public.lesson_sections, public.questions, public.cheat_sheet_items, public.levels to authenticated;
+revoke all on public.questions from anon, authenticated;
+grant select(id, module_id, content_key, sort_order, prompt, topic, points) on public.questions to authenticated;
+grant select on public.modules, public.lesson_sections, public.cheat_sheet_items, public.levels to authenticated;
 grant select, update(display_name) on public.profiles to authenticated;
 grant select on public.quiz_attempts, public.quiz_responses, public.module_progress, public.earned_badges to authenticated;

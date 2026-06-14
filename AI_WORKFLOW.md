@@ -11,5 +11,3 @@ Codex was used as the primary implementation collaborator.
 4. Implemented in phase checkpoints, with human verification before commits.
 5. Used generated code only after type checking, testing, and browser review.
 
-Claude Code and Antigravity have not been used. This document should only be
-updated to mention them if they are genuinely used later.
