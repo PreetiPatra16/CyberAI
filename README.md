@@ -20,16 +20,12 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The app provides a local demo fallback when Supabase environment values are
-empty. Add the hosted project URL and anonymous key to activate email/password
-auth, isolated anonymous demo users, and database-backed quiz persistence.
+Supabase is required. Add the hosted project URL and anonymous key before
+starting the application. Authentication, profiles, theme preferences, quiz
+attempts, responses, scores, progress, and rewards are all database-backed.
 
 Development uses `.next-dev` while production builds use `.next`, so running a
 verification build does not corrupt the active development server cache.
-
-The Supabase CLI account available during initial development did not expose the
-target project reference, so the migrations remain unapplied until the correct
-CLI account or database password is available.
 
 ## Reproduce Supabase
 
