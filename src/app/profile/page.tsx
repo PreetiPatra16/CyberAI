@@ -1,3 +1,109 @@
 "use client";
-import { AppShell } from "@/components/app-shell"; import { useProgress } from "@/components/progress-provider"; import { PageTitle } from "@/components/page-elements"; import { createSupabaseBrowserClient } from "@/lib/supabase/client"; import { totalPoints } from "@/lib/progress";
-export default function ProfilePage() { const { progress, updateProgress, resetDemo, remoteEnabled } = useProgress(); async function saveName(name: string) { updateProgress((current) => ({ ...current, displayName: name })); const supabase = createSupabaseBrowserClient(); if (supabase) { const { data: { user } } = await supabase.auth.getUser(); if (user) await supabase.from("profiles").update({ display_name: name }).eq("id", user.id); } } const attemptCount = Object.values(progress.modules).reduce((total, module) => total + module.attempts.length, 0); return <AppShell><PageTitle eyebrow="Learner profile" title="Your training identity" body="Personalize your profile and review your progress." /><div className="card mt-7 max-w-2xl p-6 sm:p-8"><label className="text-sm font-black">Display name<input className="mt-2 w-full rounded-xl border bg-transparent px-4 py-3" style={{ borderColor: "var(--border)" }} value={progress.displayName} onChange={(event) => void saveName(event.target.value)} /></label><div className="mt-6 grid gap-3 sm:grid-cols-2"><div className="rounded-xl p-4" style={{ background: "var(--surface-muted)" }}><p className="text-2xl font-black">{totalPoints(progress)}</p><p className="text-sm" style={{ color: "var(--muted)" }}>Total points</p></div><div className="rounded-xl p-4" style={{ background: "var(--surface-muted)" }}><p className="text-2xl font-black">{attemptCount}</p><p className="text-sm" style={{ color: "var(--muted)" }}>Quiz attempts</p></div></div>{!remoteEnabled && <button className="button-secondary mt-6" onClick={resetDemo}>Reset local demo progress</button>}</div></AppShell>; }
+
+import { AppShell } from "@/components/app-shell";
+import { useProgress } from "@/components/progress-provider";
+import { PageTitle } from "@/components/page-elements";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { totalPoints } from "@/lib/progress";
+
+export default function ProfilePage() {
+  const {
+    progress,
+    updateProgress,
+    remoteEnabled,
+  } = useProgress();
+
+  async function saveName(name: string) {
+    updateProgress((current) => ({
+      ...current,
+      displayName: name,
+    }));
+
+    const supabase = createSupabaseBrowserClient();
+
+    if (supabase) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({
+            display_name: name,
+          })
+          .eq("id", user.id);
+      }
+    }
+  }
+
+  const attemptCount = Object.values(progress.modules).reduce(
+    (total, module) => total + module.attempts.length,
+    0
+  );
+
+  return (
+    <AppShell>
+      <PageTitle
+        eyebrow="Learner profile"
+        title="Your training identity"
+        body="Personalize your profile and review your progress."
+      />
+
+      <div className="card mt-7 max-w-2xl p-6 sm:p-8">
+        <label className="text-sm font-black">
+          Display name
+
+          <input
+            className="mt-2 w-full rounded-xl border bg-transparent px-4 py-3"
+            style={{ borderColor: "var(--border)" }}
+            value={progress.displayName}
+            onChange={(event) => void saveName(event.target.value)}
+          />
+        </label>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div
+            className="rounded-xl p-4"
+            style={{ background: "var(--surface-muted)" }}
+          >
+            <p className="text-2xl font-black">
+              {totalPoints(progress)}
+            </p>
+
+            <p
+              className="text-sm"
+              style={{ color: "var(--muted)" }}
+            >
+              Total points
+            </p>
+          </div>
+
+          <div
+            className="rounded-xl p-4"
+            style={{ background: "var(--surface-muted)" }}
+          >
+            <p className="text-2xl font-black">
+              {attemptCount}
+            </p>
+
+            <p
+              className="text-sm"
+              style={{ color: "var(--muted)" }}
+            >
+              Quiz attempts
+            </p>
+          </div>
+        </div>
+
+        {!remoteEnabled && (
+          <button
+            className="button-secondary mt-6"
+          >
+            Reset local demo progress
+          </button>
+        )}
+      </div>
+    </AppShell>
+  );
+}

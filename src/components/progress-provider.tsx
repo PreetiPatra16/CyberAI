@@ -6,15 +6,15 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type ProgressContextValue = {
   progress: LocalProgress;
-  updateProgress: (next: LocalProgress | ((current: LocalProgress) => LocalProgress)) => void;
-  resetDemo: () => void;
+  updateProgress: (
+    next: LocalProgress | ((current: LocalProgress) => LocalProgress)
+  ) => void;
   refreshRemoteProgress: () => Promise<void>;
   remoteEnabled: boolean;
   hydrated: boolean;
 };
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
-const STORAGE_KEY = "cyberai-local-progress";
 
 type LegacyProgress = {
   attempts?: StoredAnswer[][];
@@ -22,20 +22,6 @@ type LegacyProgress = {
   passed?: boolean;
   bestScore?: number;
 };
-
-function migrateStoredProgress(stored: LocalProgress & LegacyProgress): LocalProgress {
-  const migrated: LocalProgress = { ...defaultProgress, ...stored, modules: { ...stored.modules } };
-  if (stored.attempts || stored.activeAnswers || stored.passed || stored.bestScore) {
-    const legacy: ModuleProgress = {
-      attempts: stored.attempts ?? [],
-      activeAnswers: stored.activeAnswers ?? [],
-      passed: stored.passed ?? false,
-      bestScore: stored.bestScore ?? 0,
-    };
-    migrated.modules = { "phishing-email": legacy, ...migrated.modules };
-  }
-  return migrated;
-}
 
 export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState(defaultProgress);
@@ -76,24 +62,21 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) setProgress(migrateStoredProgress(JSON.parse(stored)));
     setHydrated(true);
     void refreshRemoteProgress();
   }, []);
 
-  const updateProgress = (next: LocalProgress | ((current: LocalProgress) => LocalProgress)) => {
-    setProgress((current) => {
-      const value = typeof next === "function" ? next(current) : next;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-      return value;
-    });
+  const updateProgress = (
+    next: LocalProgress | ((current: LocalProgress) => LocalProgress)
+  ) => {
+    setProgress((current) =>
+      typeof next === "function" ? next(current) : next
+    );
   };
 
   const value = useMemo(() => ({
     progress,
     updateProgress,
-    resetDemo: () => updateProgress(defaultProgress),
     refreshRemoteProgress,
     remoteEnabled: Boolean(createSupabaseBrowserClient()),
     hydrated,
